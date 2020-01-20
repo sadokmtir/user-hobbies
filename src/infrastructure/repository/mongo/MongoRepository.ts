@@ -1,4 +1,5 @@
 import * as mongoose from 'mongoose';
+import {Readable} from "stream";
 
 export abstract class MongoBaseRepository<T extends { _id: string }> {
 
@@ -16,24 +17,28 @@ export abstract class MongoBaseRepository<T extends { _id: string }> {
         await this._model.update({id: item._id}, item);
     }
 
-    async delete(item: T): Promise<void> {
-        await this._model.remove({id: item._id});
+    async delete(itemId: string): Promise<void> {
+        await this._model.remove({id: itemId});
     }
 
     async findById(id: string): Promise<any> {
         await this._model.findById(id);
     }
 
-    async findOne(cond?: Record<string, any>) {
-        return await this._model.findOne(cond);
+    get(): Readable {
+        return this._model.find().cursor();
     }
 
-    async find(cond?: Record<string, any>, fields?: Record<string, any>, options?: Record<string, any>): Promise<any> {
-        return await this._model.find(cond, options);
-    }
-
-    private toObjectId(id: string): mongoose.Types.ObjectId {
-        return mongoose.Types.ObjectId.createFromHexString(id);
-    }
+    // async findOne(cond?: Record<string, any>) {
+    //     return await this._model.findOne(cond);
+    // }
+    //
+    // async find(cond?: Record<string, any>, fields?: Record<string, any>, options?: Record<string, any>): Promise<any> {
+    //     return await this._model.find(cond, options);
+    // }
+    //
+    // private toObjectId(id: string): mongoose.Types.ObjectId {
+    //     return mongoose.Types.ObjectId.createFromHexString(id);
+    // }
 
 }

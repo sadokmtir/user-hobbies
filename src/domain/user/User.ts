@@ -21,4 +21,8 @@ export default class User implements UserInterface {
     public static hydrate(id: string, name: string, hobbies: Hobby[] = []): User {
         return new User(id, name, hobbies);
     }
+
+    public toJson() {
+       return  JSON.stringify(this);
+    }
 }
