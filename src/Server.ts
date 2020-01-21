@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import bodyParser from 'body-parser';
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 import createError from 'http-errors';
 import cors from 'cors';
 import httpLogger from 'morgan';

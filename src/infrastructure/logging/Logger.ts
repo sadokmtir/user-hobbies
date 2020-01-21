@@ -1,7 +1,6 @@
 import {createLogger, format, transports} from 'winston';
 import Nconf from '../Nconf';
 
-
 const {combine, timestamp, prettyPrint} = format;
 const logger = createLogger({
     level: Nconf.get('logger:level'),
@@ -25,4 +24,4 @@ if (process.env.NODE_ENV !== 'production') {
     }));
 }
 
-export default Logger;
+export default logger;

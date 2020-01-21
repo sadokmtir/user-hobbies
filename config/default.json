@@ -4,9 +4,9 @@
   },
   "logger": {
     "fileLevel": "error",
-    "level": "info",
+    "level": "info"
   },
   "mongoose": {
-    "url": "mongodb://localhost:27017/smsDigital"
+    "url": "mongodb://localhost:27017/mercavus"
   }
 }

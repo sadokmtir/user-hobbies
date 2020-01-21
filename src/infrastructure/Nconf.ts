@@ -1,7 +1,7 @@
 import nconf from 'nconf';
 import path from 'path';
 
-const configPath = path.resolve(__dirname) + '/config/default.json';
+const configPath = path.resolve(__dirname, '../../config/default.json');
 
 const envConf = nconf.argv({
     'p': {
