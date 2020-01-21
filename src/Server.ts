@@ -2,13 +2,12 @@ import express from 'express';
 import path from 'path';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
-import createError from 'http-errors';
 import cors from 'cors';
 import httpLogger from 'morgan';
 import Controller from './controllers/Controller.interface';
 import nconf from './infrastructure/Nconf';
 import logger from './infrastructure/logging/Logger';
-import errorMiddleware from './infrastructure/middleware/ErrorMiddleware';
+import * as errorMiddleware from './infrastructure/middleware/ErrorMiddleware';
 
 class Server {
     public app: express.Application;
@@ -17,7 +16,7 @@ class Server {
         this.app = express();
         this.initializeMiddleware();
         this.initializeControllers(controllers);
-        this.catchNotFoundRoutes();
+        this.applyExceptionHandlers();
     }
 
     public static async createServer(controllers: Controller[]): Promise<Server> {
@@ -26,8 +25,9 @@ class Server {
     }
 
     public listen() {
-        this.app.listen(process.env.PORT, () => {
-            logger.info(`App listening on the port ${nconf.get('server:port')}`);
+        const port = nconf.get('server:port');
+        this.app.listen(port, () => {
+            logger.info(`App listening on the port ${port}`);
         });
     }
 
@@ -52,7 +52,6 @@ class Server {
         this.app.use(bodyParser.urlencoded({extended: false}));
         this.app.use(httpLogger('dev'));
         this.app.use(express.static(path.join(__dirname, 'public')));
-        this.app.use(errorMiddleware);
     }
 
     private initializeControllers(controllers: Controller[]) {
@@ -61,12 +60,10 @@ class Server {
         });
     }
 
-    private catchNotFoundRoutes() {
-
-        // catch 404 and forward to error handler
-        this.app.use(function (req, res, next) {
-            next(new createError.NotFound());
-        });
+    private applyExceptionHandlers() {
+        errorMiddleware.handle404Error(this.app);
+        errorMiddleware.handleClientError(this.app);
+        errorMiddleware.handleServerError(this.app);
     }
 }
 

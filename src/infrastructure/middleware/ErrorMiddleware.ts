@@ -1,15 +1,32 @@
-import { NextFunction, Request, Response } from 'express';
+import {Request, Response, NextFunction, Application} from 'express';
+import logger from '../logging/Logger';
+import {HTTPClientError} from './exceptions/HttpClientError';
 import HttpException from './exceptions/HttpException';
 
-function errorMiddleware(error: HttpException, request: Request, response: Response, next: NextFunction) {
-    const status = error.status || 500;
-    const message = error.message || 'Something went wrong';
-    response
-        .status(status)
-        .send({
-            status,
-            message,
-        });
-}
+export const handle404Error = (router: Application) => {
+    router.use((req: Request, res: Response) => {
+        throw new HttpException(404, 'Method not found.');
+    });
+};
 
-export default errorMiddleware;
+export const handleClientError = (router: Application) => {
+    router.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+        if (err instanceof HTTPClientError) {
+            logger.warn(err);
+            res.status(err.status).send(err.message);
+        } else {
+            next(err);
+        }
+    });
+};
+
+export const handleServerError = (router: Application) => {
+    router.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+        logger.error(err);
+        if (process.env.NODE_ENV === 'production') {
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.status(500).send(err.stack);
+        }
+    });
+};

@@ -1,4 +1,6 @@
-class HttpException extends Error {
+import {HTTPClientError} from './HttpClientError';
+
+class HttpException extends HTTPClientError {
     status: number;
     message: string;
     constructor(status: number, message: string) {
