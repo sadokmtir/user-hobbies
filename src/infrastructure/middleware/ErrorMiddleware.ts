@@ -13,7 +13,7 @@ export const handleClientError = (router: Application) => {
     router.use((err: Error, req: Request, res: Response, next: NextFunction) => {
         if (err instanceof HTTPClientError) {
             logger.warn(err);
-            res.status(err.status).send(err.message);
+            res.status(err.status).json({ error: err.message });
         } else {
             next(err);
         }

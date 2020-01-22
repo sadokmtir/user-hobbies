@@ -8,6 +8,7 @@ import Controller from './controllers/Controller.interface';
 import nconf from './infrastructure/Nconf';
 import logger from './infrastructure/logging/Logger';
 import * as errorMiddleware from './infrastructure/middleware/ErrorMiddleware';
+import UserModel from './domain/user/User.schema';
 
 class Server {
     public app: express.Application;
@@ -21,6 +22,7 @@ class Server {
 
     public static async createServer(controllers: Controller[]): Promise<Server> {
         await this.connectToTheDatabase();
+        await this.buildUserIndex();
         return new Server(controllers);
     }
 
@@ -33,16 +35,35 @@ class Server {
 
     private static async connectToTheDatabase() {
         const mongoDsn = nconf.get('mongoose:url');
-        const mongo = await mongoose.connect(mongoDsn, {useNewUrlParser: true});
-        const {connection} = mongo;
+        const connectToMongo = new Promise(((resolve, reject) => {
 
-        connection.once('open', () => {
-            logger.info('Database started');
-        });
+            mongoose.connect(mongoDsn, {useNewUrlParser: true, useCreateIndex: true });
+            mongoose.connection.on('connected', () => {
+                logger.info('Database started');
+                resolve();
+            });
 
-        connection.on('error', () => {
-            logger.error('MongoDB connection error. Please make sure MongoDB is running.');
-            process.exit();
+            mongoose.connection.on('error', () => {
+                logger.error('MongoDB connection error. Please make sure MongoDB is running.');
+                process.exit();
+                reject();
+            });
+
+        }));
+
+        await connectToMongo;
+    }
+
+    private static async buildUserIndex() {
+        // Need to wait for the index to finish building before saving,
+        // otherwise unique constraints may be violated.
+        await new Promise((resolve, reject) => {
+            UserModel.once('index', function (error) {
+                if (!error) {
+                    return resolve();
+                }
+                reject();
+            });
         });
     }
 

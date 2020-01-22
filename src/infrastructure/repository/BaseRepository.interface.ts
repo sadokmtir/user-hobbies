@@ -4,7 +4,7 @@ export interface Read<T> {
     findById: (id: string) => Promise<T>;
     // findOne(cond?: Record<string, any>, callback?: (err: any, res: T) => void): mongoose.Query<T>;
     // find(cond: Object, fields: Object, options: Object, callback?: (err: any, res: T[]) => void): mongoose.Query<T[]>;
-    get: () => Readable
+    get: () => Readable;
 }
 
 export interface Write<T> {

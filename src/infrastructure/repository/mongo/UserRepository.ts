@@ -3,8 +3,9 @@ import {User as UserInterface} from '../../../domain/user/User.interface';
 import {MongoBaseRepository} from './MongoRepository';
 import UserModel from '../../../domain/user/User.schema';
 import User from '../../../domain/user/User';
-import JsonTransformer from "../../StreamTransformer";
+import JsonTransformer from '../../StreamTransformer';
 import logger from '../../logging/Logger';
+import HttpException from "../../middleware/exceptions/HttpException";
 
 export class UserRepository extends MongoBaseRepository<UserInterface> implements BaseRepository<UserInterface> {
     constructor() {
@@ -17,7 +18,14 @@ export class UserRepository extends MongoBaseRepository<UserInterface> implement
     }
 
     public async create(user: User): Promise<void> {
-        await super.create(user);
+        try {
+            await super.create(user);
+        } catch (error) {
+            if (error.message.indexOf('duplicate key error') !== -1) {
+                throw new HttpException(400, 'User already exists');
+            }
+            throw error;
+        }
     }
 
     public async delete(userId: string): Promise<void> {
@@ -32,10 +40,10 @@ export class UserRepository extends MongoBaseRepository<UserInterface> implement
         const JsonStream = new JsonTransformer();
         return super.get()
             .on('error', (error) => {
-                logger.error(`Error while getting the cursor stream: ${error.message}`)
-                JsonStream.end()
+                logger.error(`Error while getting the cursor stream: ${error.message}`);
+                JsonStream.end();
             })
-            .pipe(JsonStream)
+            .pipe(JsonStream);
     }
 
 }

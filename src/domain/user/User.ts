@@ -1,6 +1,6 @@
 import {User as UserInterface} from './User.interface';
 import {Hobby} from '../hobby/Hobby.interface';
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 
 export default class User implements UserInterface {
     name: string;

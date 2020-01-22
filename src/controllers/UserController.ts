@@ -6,6 +6,7 @@ import {User as UserInterface} from '../domain/user/User.interface';
 import validationMiddleware from '../infrastructure/middleware/ValidationMiddleware';
 import CreateUserDto from '../domain/user/user.dto';
 import User from '../domain/user/User';
+import {NextFunction} from "express";
 
 export class UserController implements Controller {
     path: string;
@@ -20,7 +21,7 @@ export class UserController implements Controller {
     }
 
     private initializeRoutes() {
-        this.router.route(this.path)
+        this.router.route('')
             .get(this.getUsers)
             .post(validationMiddleware(CreateUserDto), this.createUser);
 
@@ -29,11 +30,15 @@ export class UserController implements Controller {
             .delete(this.deleteUser);
     }
 
-    private createUser = async (request: express.Request, response: express.Response) => {
+    private createUser = async (request: express.Request, response: express.Response, next: NextFunction) => {
         const requestBody = request.body;
         const user = User.create(requestBody.name);
-        await this.userRepository.create(user);
-        return response.status(201).json(user.toJson())
+        try {
+            await this.userRepository.create(user);
+        } catch (e) {
+            return next(e);
+        }
+        return response.status(201).json(user);
     };
 
     private getUsers = (request: express.Request, response: express.Response) => {
