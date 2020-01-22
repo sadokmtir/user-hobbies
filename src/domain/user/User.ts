@@ -22,7 +22,11 @@ export default class User implements UserInterface {
         return new User(id, name, hobbies);
     }
 
+    public changeName(newUserName: string) {
+        this.name = newUserName;
+    }
+
     public toJson() {
-       return  JSON.stringify(this);
+        return JSON.stringify(this);
     }
 }

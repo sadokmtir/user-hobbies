@@ -5,4 +5,5 @@ export interface User {
     hobbies: Hobby[];
     _id: string;
     toJson: () => string;
+    changeName: (newUserName: string) => void;
 }

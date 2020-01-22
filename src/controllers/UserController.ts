@@ -1,12 +1,11 @@
-import Controller from './Controller.interface';
 import * as express from 'express';
+import Controller from './Controller.interface';
 import {UserRepository} from '../infrastructure/repository/mongo/UserRepository';
 import {BaseRepository} from '../infrastructure/repository/BaseRepository.interface';
 import {User as UserInterface} from '../domain/user/User.interface';
 import validationMiddleware from '../infrastructure/middleware/ValidationMiddleware';
-import CreateUserDto from '../domain/user/user.dto';
+import UserDto from '../domain/user/user.dto';
 import User from '../domain/user/User';
-import {NextFunction} from "express";
 
 export class UserController implements Controller {
     path: string;
@@ -23,14 +22,16 @@ export class UserController implements Controller {
     private initializeRoutes() {
         this.router.route('')
             .get(this.getUsers)
-            .post(validationMiddleware(CreateUserDto), this.createUser);
+            .post(validationMiddleware(UserDto), this.createUser);
 
-        this.router.route(this.path + '/:id')
+        this.router.route('/:id')
             .get(this.getUser)
-            .delete(this.deleteUser);
+            .delete(this.deleteUser)
+            .patch(validationMiddleware(UserDto), this.modifyUser);
+
     }
 
-    private createUser = async (request: express.Request, response: express.Response, next: NextFunction) => {
+    private createUser = async (request: express.Request, response: express.Response, next: express.NextFunction) => {
         const requestBody = request.body;
         const user = User.create(requestBody.name);
         try {
@@ -47,16 +48,41 @@ export class UserController implements Controller {
             .pipe(response.type('json'));
     };
 
-    private deleteUser = async (request: express.Request, response: express.Response) => {
+    private deleteUser = async (request: express.Request, response: express.Response, next: express.NextFunction) => {
         const userId = request.params.id;
-        await this.userRepository.delete(userId);
-        return response.status(204).end();
+        try {
+            await this.userRepository.delete(userId);
+            return response.send(204);
+        } catch (e) {
+            next(e);
+        }
     };
 
 
-    private getUser = async (request: express.Request, response: express.Response) => {
+    private getUser = async (request: express.Request, response: express.Response, next: express.NextFunction) => {
         const userId = request.params.id;
-        const user = await this.userRepository.findById(userId);
-        return response.json(user.toJson());
+        try {
+            const user = await this.userRepository.findById(userId);
+            return response.json(user);
+        } catch (e) {
+            return next(e);
+        }
     };
+
+    private modifyUser = async (request: express.Request, response: express.Response, next: express.NextFunction) => {
+        const userId = request.params.id;
+        const userData: UserDto = request.body;
+        try {
+            const user = await this.userRepository.findById(userId);
+
+            if (userData.name && userData.name !== user.name) {
+                user.changeName(userData.name);
+            }
+            await this.userRepository.update(user);
+            return response.json(user);
+        } catch (e) {
+            next(e) ;
+        }
+
+    }
 }

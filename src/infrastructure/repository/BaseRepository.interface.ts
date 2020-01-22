@@ -1,4 +1,4 @@
-import {Readable} from "stream";
+import {Readable} from 'stream';
 
 export interface Read<T> {
     findById: (id: string) => Promise<T>;

@@ -1,25 +1,35 @@
+import mongoose from 'mongoose';
 import {BaseRepository} from '../BaseRepository.interface';
 import {User as UserInterface} from '../../../domain/user/User.interface';
 import {MongoBaseRepository} from './MongoRepository';
 import UserModel from '../../../domain/user/User.schema';
 import User from '../../../domain/user/User';
-import JsonTransformer from '../../StreamTransformer';
 import logger from '../../logging/Logger';
-import HttpException from "../../middleware/exceptions/HttpException";
+import HttpException from '../../middleware/exceptions/HttpException';
+import UserStreamTransformer from '../../stream/UserStreamTransformer';
+import {UserNotFoundException} from '../../middleware/exceptions/UserException';
 
-export class UserRepository extends MongoBaseRepository<UserInterface> implements BaseRepository<UserInterface> {
+export class UserRepository implements BaseRepository<UserInterface> {
+    private mongoBaseRepo: MongoBaseRepository<User>;
+
     constructor() {
-        super(UserModel);
+        //@todo: add dependency injection
+        this.mongoBaseRepo = new MongoBaseRepository<UserInterface>(UserModel);
     }
 
-    public async findById(id: string): Promise<UserInterface> {
-        const userData = await super.findById(id);
+    public async findById(userId: string): Promise<UserInterface> {
+        this.validateUserIdOrThrow(userId);
+        const userData = await this.mongoBaseRepo.findById(userId);
+
+        if (!userData) {
+            throw UserNotFoundException;
+        }
         return User.hydrate(userData.id, userData.name, userData.hobbies ? userData.hobbies : []);
     }
 
     public async create(user: User): Promise<void> {
         try {
-            await super.create(user);
+            await this.mongoBaseRepo.create(user);
         } catch (error) {
             if (error.message.indexOf('duplicate key error') !== -1) {
                 throw new HttpException(400, 'User already exists');
@@ -28,17 +38,22 @@ export class UserRepository extends MongoBaseRepository<UserInterface> implement
         }
     }
 
-    public async delete(userId: string): Promise<void> {
-        await super.delete(userId);
+    public async delete(userId: string) {
+        this.validateUserIdOrThrow(userId);
+        const result = await this.mongoBaseRepo.delete(userId);
+        if (result.deletedCount === 0) {
+            throw UserNotFoundException;
+        }
     }
 
-    public async update(user: User) {
-        await super.update(user);
+    public async update( user: User) {
+        this.validateUserIdOrThrow(user._id);
+        await this.mongoBaseRepo.update(user);
     }
 
     public get() {
-        const JsonStream = new JsonTransformer();
-        return super.get()
+        const JsonStream = new UserStreamTransformer();
+        return this.mongoBaseRepo.get()
             .on('error', (error) => {
                 logger.error(`Error while getting the cursor stream: ${error.message}`);
                 JsonStream.end();
@@ -46,4 +61,9 @@ export class UserRepository extends MongoBaseRepository<UserInterface> implement
             .pipe(JsonStream);
     }
 
+    private validateUserIdOrThrow(userId: string): void {
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            throw UserNotFoundException;
+        }
+    }
 }
