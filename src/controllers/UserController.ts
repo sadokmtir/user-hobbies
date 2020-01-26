@@ -58,7 +58,6 @@ export class UserController implements Controller {
         }
     };
 
-
     private getUser = async (request: express.Request, response: express.Response, next: express.NextFunction) => {
         const userId = request.params.id;
         try {
@@ -81,7 +80,7 @@ export class UserController implements Controller {
             await this.userRepository.update(user);
             return response.json(user);
         } catch (e) {
-            next(e) ;
+            next(e);
         }
 
     }
