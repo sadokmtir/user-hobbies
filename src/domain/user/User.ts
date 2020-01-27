@@ -1,6 +1,7 @@
 import {User as UserInterface} from './User.interface';
 import {Hobby} from '../hobby/Hobby.interface';
 import mongoose from 'mongoose';
+import {HobbyExistsOnUser} from "../../infrastructure/middleware/exceptions/HobbyExceptions";
 
 export default class User implements UserInterface {
     name: string;
@@ -27,6 +28,10 @@ export default class User implements UserInterface {
     }
 
     public addHobby(hobby: Hobby) {
+
+        if (this.hobbies.find(userHobby => userHobby.name === hobby.name)) {
+            throw HobbyExistsOnUser;
+        }
         this.hobbies.push(hobby);
     }
 

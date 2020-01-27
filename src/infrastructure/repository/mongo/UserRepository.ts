@@ -7,8 +7,9 @@ import User from '../../../domain/user/User';
 import logger from '../../logging/Logger';
 import HttpException from '../../middleware/exceptions/HttpException';
 import UserStreamTransformer from '../../stream/UserStreamTransformer';
-import {UserNotFoundException} from '../../middleware/exceptions/UserException';
-import Hobby from '../../../domain/hobby/Hobby';
+import {UserNotFoundException} from '../../middleware/exceptions/UserExceptions';
+import Hobby from "../../../domain/hobby/Hobby";
+import {Hobby as HobbyInterface} from "../../../domain/hobby/Hobby.interface";
 
 export class UserRepository implements BaseUserRepository {
     private mongoBaseRepo: MongoBaseRepository<User>;
@@ -20,12 +21,17 @@ export class UserRepository implements BaseUserRepository {
 
     public async findById(userId: string): Promise<UserInterface> {
         this.validateUserIdOrThrow(userId);
-        const userData = await this.mongoBaseRepo.findById(userId);
+        let hobbies = [];
+        const userData = await this.mongoBaseRepo.findById(userId).populate('hobbies');
 
         if (!userData) {
             throw UserNotFoundException;
         }
-        return User.hydrate(userData.id, userData.name, userData.hobbies ? userData.hobbies : []);
+
+        if (userData.hobbies && userData.hobbies.length > 0) {
+            hobbies = userData.hobbies.map((hobby: HobbyInterface) => Hobby.create(hobby.name, hobby.passionLevel, hobby.year));
+        }
+        return User.hydrate(userData._id, userData.name, hobbies);
     }
 
     public async create(user: User): Promise<void> {

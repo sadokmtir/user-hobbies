@@ -24,7 +24,7 @@ export class UserController implements Controller {
             .get(this.getUsers)
             .post(validationMiddleware(UserDto), this.createUser);
 
-        this.router.route('/:id')
+        this.router.route(`${this.path}/:id`)
             .get(this.getUser)
             .delete(this.deleteUser)
             .patch(validationMiddleware(UserDto), this.modifyUser);

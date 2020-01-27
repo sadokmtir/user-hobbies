@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, {DocumentQuery} from 'mongoose';
 import {Readable} from 'stream';
 
 export class MongoBaseRepository<T extends { _id: string }> {
@@ -20,11 +20,12 @@ export class MongoBaseRepository<T extends { _id: string }> {
     }
 
     async delete(itemId: string) {
-         return await this._model.remove({_id: itemId});
+        return await this._model.remove({_id: itemId});
     }
 
-    async findById(id: string): Promise<any> {
-        return this._model.findById(id);
+     findById(id: string): T & DocumentQuery<any, any, any>  {
+        // @ts-ignore
+         return this._model.findById(id);
     }
 
     get(): Readable {
