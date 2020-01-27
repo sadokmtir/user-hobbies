@@ -1,6 +1,6 @@
 export interface Hobby {
-    id: string;
-    passionLevel: PassionLevel;
+    _id: string;
+    passionLevel: string;
     name: string;
     year: number;
 }

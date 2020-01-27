@@ -6,4 +6,5 @@ export interface User {
     _id: string;
     toJson: () => string;
     changeName: (newUserName: string) => void;
+    addHobby: (hobby: Hobby) => void;
 }

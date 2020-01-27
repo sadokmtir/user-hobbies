@@ -20,7 +20,7 @@ export class UserController implements Controller {
     }
 
     private initializeRoutes() {
-        this.router.route('')
+        this.router.route(this.path)
             .get(this.getUsers)
             .post(validationMiddleware(UserDto), this.createUser);
 

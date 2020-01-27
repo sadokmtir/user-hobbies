@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import {BaseRepository} from '../BaseRepository.interface';
+import {BaseUserRepository} from '../BaseRepository.interface';
 import {User as UserInterface} from '../../../domain/user/User.interface';
 import {MongoBaseRepository} from './MongoRepository';
 import UserModel from '../../../domain/user/User.schema';
@@ -8,8 +8,9 @@ import logger from '../../logging/Logger';
 import HttpException from '../../middleware/exceptions/HttpException';
 import UserStreamTransformer from '../../stream/UserStreamTransformer';
 import {UserNotFoundException} from '../../middleware/exceptions/UserException';
+import Hobby from '../../../domain/hobby/Hobby';
 
-export class UserRepository implements BaseRepository<UserInterface> {
+export class UserRepository implements BaseUserRepository {
     private mongoBaseRepo: MongoBaseRepository<User>;
 
     constructor() {
@@ -46,7 +47,7 @@ export class UserRepository implements BaseRepository<UserInterface> {
         }
     }
 
-    public async update( user: User) {
+    public async update(user: User) {
         this.validateUserIdOrThrow(user._id);
         await this.mongoBaseRepo.update(user);
     }
@@ -59,6 +60,10 @@ export class UserRepository implements BaseRepository<UserInterface> {
                 JsonStream.end();
             })
             .pipe(JsonStream);
+    }
+
+    public async save(user: User) {
+        await UserModel.updateOne({_id: user._id}, {$addToSet: {hobbies: {$each: user.hobbies.map(hobby => hobby._id)}}});
     }
 
     private validateUserIdOrThrow(userId: string): void {

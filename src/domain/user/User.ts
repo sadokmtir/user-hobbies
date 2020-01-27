@@ -26,6 +26,11 @@ export default class User implements UserInterface {
         this.name = newUserName;
     }
 
+    public addHobby(hobby: Hobby) {
+        this.hobbies.push(hobby);
+    }
+
+
     public toJson() {
         return JSON.stringify(this);
     }

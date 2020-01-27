@@ -77,7 +77,7 @@ class Server {
 
     private initializeControllers(controllers: Controller[]) {
         controllers.forEach((controller) => {
-            this.app.use(controller.path, controller.router);
+            this.app.use('/', controller.router);
         });
     }
 
