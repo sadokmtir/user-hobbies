@@ -8,28 +8,29 @@ import logger from '../../logging/Logger';
 import HttpException from '../../middleware/exceptions/HttpException';
 import UserStreamTransformer from '../../stream/UserStreamTransformer';
 import {UserNotFoundException} from '../../middleware/exceptions/UserExceptions';
-import Hobby from "../../../domain/hobby/Hobby";
-import {Hobby as HobbyInterface} from "../../../domain/hobby/Hobby.interface";
+import Hobby from '../../../domain/hobby/Hobby';
 
 export class UserRepository implements BaseUserRepository {
     private mongoBaseRepo: MongoBaseRepository<User>;
 
     constructor() {
-        //@todo: add dependency injection
+        //@todo: I can add dependency injection here, so I can modify in one place the dependency here we have mongo but it could
+        // be mysql, in-memory ...
         this.mongoBaseRepo = new MongoBaseRepository<UserInterface>(UserModel);
     }
 
     public async findById(userId: string): Promise<UserInterface> {
         this.validateUserIdOrThrow(userId);
         let hobbies = [];
-        const userData = await this.mongoBaseRepo.findById(userId).populate('hobbies');
+        const userData = await this.mongoBaseRepo.findById(mongoose.Types.ObjectId(userId)).populate('hobbies');
 
         if (!userData) {
             throw UserNotFoundException;
         }
 
         if (userData.hobbies && userData.hobbies.length > 0) {
-            hobbies = userData.hobbies.map((hobby: HobbyInterface) => Hobby.create(hobby.name, hobby.passionLevel, hobby.year));
+            hobbies = userData.hobbies.map((hobby: Hobby & mongoose.Document) =>
+                Hobby.hydrate(hobby._id, hobby.name, hobby.passionLevel, hobby.year));
         }
         return User.hydrate(userData._id, userData.name, hobbies);
     }
@@ -47,7 +48,7 @@ export class UserRepository implements BaseUserRepository {
 
     public async delete(userId: string) {
         this.validateUserIdOrThrow(userId);
-        const result = await this.mongoBaseRepo.delete(userId);
+        const result = await this.mongoBaseRepo.delete(mongoose.Types.ObjectId(userId));
         if (result.deletedCount === 0) {
             throw UserNotFoundException;
         }
@@ -60,7 +61,8 @@ export class UserRepository implements BaseUserRepository {
 
     public get() {
         const JsonStream = new UserStreamTransformer();
-        return this.mongoBaseRepo.get()
+        return this.mongoBaseRepo.get().populate('hobbies')
+            .cursor()
             .on('error', (error) => {
                 logger.error(`Error while getting the cursor stream: ${error.message}`);
                 JsonStream.end();
@@ -69,10 +71,10 @@ export class UserRepository implements BaseUserRepository {
     }
 
     public async save(user: User) {
-        await UserModel.updateOne({_id: user._id}, {$addToSet: {hobbies: {$each: user.hobbies.map(hobby => hobby._id)}}});
+        await UserModel.updateOne({_id: user._id}, {$set: {hobbies: user.hobbies.map(hobby => hobby._id)}});
     }
 
-    private validateUserIdOrThrow(userId: string): void {
+    private validateUserIdOrThrow(userId: string | mongoose.Types.ObjectId): void {
         if (!mongoose.Types.ObjectId.isValid(userId)) {
             throw UserNotFoundException;
         }

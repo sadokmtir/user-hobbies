@@ -5,9 +5,8 @@ import {BaseRepository, BaseUserRepository} from '../infrastructure/repository/B
 import validationMiddleware from '../infrastructure/middleware/ValidationMiddleware';
 import HobbyDto from '../domain/hobby/hobby.dto';
 import {Hobby as HobbyInterface} from '../domain/hobby/Hobby.interface';
-import {HobbyRepository} from "../infrastructure/repository/mongo/HobbyRepository";
-import Hobby from "../domain/hobby/Hobby";
-import {User as UserInterface} from "../domain/user/User.interface";
+import {HobbyRepository} from '../infrastructure/repository/mongo/HobbyRepository';
+import Hobby from '../domain/hobby/Hobby';
 
 export class HobbyController implements Controller {
     path: string;
@@ -25,14 +24,10 @@ export class HobbyController implements Controller {
 
     private initializeRoutes() {
         this.router.route(this.path)
-        // .get(this.getUsers)
-            .post(validationMiddleware(HobbyDto), this.createHobbyToUser);
+            .post(validationMiddleware(HobbyDto, true), this.createHobbyToUser);
 
-        // this.router.route('/:id')
-        //     .get(this.getUser)
-        //     .delete(this.deleteUser)
-        //     .patch(validationMiddleware(UserDto), this.modifyUser);
-
+        this.router.route(`${this.path}/:hobbyId`)
+            .delete(this.deleteHobby);
     }
 
     private createHobbyToUser = async (request: express.Request, response: express.Response, next: express.NextFunction) => {
@@ -50,46 +45,17 @@ export class HobbyController implements Controller {
         }
     };
 
-    private getUsers = (request: express.Request, response: express.Response) => {
-        // return this.userRepository
-        //     .get()
-        //     .pipe(response.type('json'));
+    private deleteHobby = async (request: express.Request, response: express.Response, next: express.NextFunction) => {
+        try {
+            const userId = request.params.userId;
+            const hobbyId = request.params.hobbyId;
+            const user = await this.userRepository.findById(userId);
+            user.deleteHobby(hobbyId);
+            await this.hobbyRepository.delete(hobbyId);
+            await this.userRepository.save(user);
+            response.json(user);
+        } catch (e) {
+            next(e);
+        }
     };
-
-    private deleteUser = async (request: express.Request, response: express.Response, next: express.NextFunction) => {
-        // const userId = request.params.id;
-        // try {
-        //     await this.userRepository.delete(userId);
-        //     return response.send(204);
-        // } catch (e) {
-        //     next(e);
-        // }
-    };
-
-    private getUser = async (request: express.Request, response: express.Response, next: express.NextFunction) => {
-        // const userId = request.params.id;
-        // try {
-        //     const user = await this.userRepository.findById(userId);
-        //     return response.json(user);
-        // } catch (e) {
-        //     return next(e);
-        // }
-    };
-
-    private modifyUser = async (request: express.Request, response: express.Response, next: express.NextFunction) => {
-        // const userId = request.params.id;
-        // const userData: UserDto = request.body;
-        // try {
-        //     const user = await this.userRepository.findById(userId);
-        //
-        //     if (userData.name && userData.name !== user.name) {
-        //         user.changeName(userData.name);
-        //     }
-        //     await this.userRepository.update(user);
-        //     return response.json(user);
-        // } catch (e) {
-        //     next(e);
-        // }
-
-    }
 }

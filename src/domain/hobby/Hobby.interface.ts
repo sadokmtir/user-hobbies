@@ -1,5 +1,7 @@
+import mongoose from 'mongoose';
+
 export interface Hobby {
-    _id: string;
+    _id: mongoose.Types.ObjectId;
     passionLevel: string;
     name: string;
     year: number;

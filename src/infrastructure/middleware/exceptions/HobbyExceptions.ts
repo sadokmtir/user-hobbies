@@ -1,3 +1,4 @@
 import HttpException from './HttpException';
 
-export const HobbyExistsOnUser = new HttpException(404, 'Hobby does already belong to the user.');
+export const HobbyDoesNotExistOnUserException = new HttpException(400, 'Hobby does already belong to the user.');
+export const HobbyNotFoundException = new HttpException(404, 'Hobby does already belong to the user.');

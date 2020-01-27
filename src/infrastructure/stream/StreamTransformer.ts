@@ -3,7 +3,7 @@ import {Transform, TransformCallback} from 'stream';
 export default abstract class JsonTransformer<T extends { toJson: Function }> extends Transform {
     private index: number;
 
-    constructor() {
+    protected constructor() {
         super({writableObjectMode: true});
         this.index = 0;
     }

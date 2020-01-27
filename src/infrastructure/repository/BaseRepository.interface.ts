@@ -1,11 +1,8 @@
 import {Readable} from 'stream';
-import {User} from "../../domain/user/User.interface";
-import {Hobby} from "../../domain/hobby/Hobby.interface";
+import {User} from '../../domain/user/User.interface';
 
 export interface Read<T> {
     findById: (id: string) => Promise<T>;
-    // findOne(cond?: Record<string, any>, callback?: (err: any, res: T) => void): mongoose.Query<T>;
-    // find(cond: Object, fields: Object, options: Object, callback?: (err: any, res: T[]) => void): mongoose.Query<T[]>;
     get: () => Readable;
 }
 
@@ -15,6 +12,8 @@ export interface Write<T> {
     update: (item: T) => Promise<void>;
 }
 
+//@Note: the idea behind this interface is to decouple the infra layer, so to say any database that implements
+// this interface could basically work with our application, no coupling to Mongodb
 export interface BaseRepository<T> extends Read<T>, Write<T> {
 }
 

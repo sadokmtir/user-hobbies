@@ -1,25 +1,26 @@
 import {User as UserInterface} from './User.interface';
 import {Hobby} from '../hobby/Hobby.interface';
 import mongoose from 'mongoose';
-import {HobbyExistsOnUser} from "../../infrastructure/middleware/exceptions/HobbyExceptions";
+import {HobbyDoesNotExistOnUserException} from '../../infrastructure/middleware/exceptions/HobbyExceptions';
 
+// @Note: tried decoupling my core domain entities from the infra level as maximum as possible
 export default class User implements UserInterface {
     name: string;
     hobbies: Hobby[] = [];
-    _id: string;
+    _id: mongoose.Types.ObjectId;
 
-    private constructor(id: string, name: string, hobbies: Hobby[] = []) {
+    private constructor(id: mongoose.Types.ObjectId, name: string, hobbies: Hobby[] = []) {
         this.name = name;
         this.hobbies = hobbies;
         this._id = id;
     }
 
     public static create(name: string, hobbies: Hobby[] = []): User {
-        const id = new mongoose.Types.ObjectId().toHexString();
+        const id = new mongoose.Types.ObjectId();
         return new User(id, name, hobbies);
     }
 
-    public static hydrate(id: string, name: string, hobbies: Hobby[] = []): User {
+    public static hydrate(id: mongoose.Types.ObjectId, name: string, hobbies: Hobby[] = []): User {
         return new User(id, name, hobbies);
     }
 
@@ -30,11 +31,21 @@ export default class User implements UserInterface {
     public addHobby(hobby: Hobby) {
 
         if (this.hobbies.find(userHobby => userHobby.name === hobby.name)) {
-            throw HobbyExistsOnUser;
+            throw HobbyDoesNotExistOnUserException;
         }
         this.hobbies.push(hobby);
     }
 
+    public deleteHobby(hobbyId: string) {
+
+        const hobbyIndex = this.hobbies.findIndex(hobby => hobby._id.toHexString() === hobbyId);
+
+        if (hobbyIndex === -1) {
+            throw HobbyDoesNotExistOnUserException;
+        }
+        this.hobbies.splice(hobbyIndex,  1);
+
+    }
 
     public toJson() {
         return JSON.stringify(this);

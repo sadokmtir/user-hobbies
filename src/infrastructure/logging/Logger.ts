@@ -10,7 +10,6 @@ const logger = createLogger({
     ),
     defaultMeta: {service: 'user-hobbies'},
     transports: [
-        // - Write all logs error (and below) to `error.log`.
         new transports.File(
             {filename: 'error.log', level: Nconf.get('logger:fileLevel')}),
     ],

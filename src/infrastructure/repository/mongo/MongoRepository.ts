@@ -1,7 +1,6 @@
 import mongoose, {DocumentQuery} from 'mongoose';
-import {Readable} from 'stream';
 
-export class MongoBaseRepository<T extends { _id: string }> {
+export class MongoBaseRepository<T extends { _id: mongoose.Types.ObjectId }> {
 
     private _model: mongoose.Model<mongoose.Document>;
 
@@ -19,29 +18,16 @@ export class MongoBaseRepository<T extends { _id: string }> {
         await this._model.update({itemId}, itemData);
     }
 
-    async delete(itemId: string) {
+    async delete(itemId: mongoose.Types.ObjectId) {
         return await this._model.remove({_id: itemId});
     }
 
-     findById(id: string): T & DocumentQuery<any, any, any>  {
+     findById(id: mongoose.Types.ObjectId): T & DocumentQuery<any, any, any>  {
         // @ts-ignore
          return this._model.findById(id);
     }
 
-    get(): Readable {
-        return this._model.find().cursor();
+    get() {
+        return this._model.find();
     }
-
-    // async findOne(cond?: Record<string, any>) {
-    //     return await this._model.findOne(cond);
-    // }
-    //
-    // async find(cond?: Record<string, any>, fields?: Record<string, any>, options?: Record<string, any>): Promise<any> {
-    //     return await this._model.find(cond, options);
-    // }
-    //
-    // private toObjectId(id: string): mongoose.Types.ObjectId {
-    //     return mongoose.Types.ObjectId.createFromHexString(id);
-    // }
-
 }

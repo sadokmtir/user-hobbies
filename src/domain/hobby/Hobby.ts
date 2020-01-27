@@ -1,18 +1,23 @@
 import mongoose from 'mongoose';
 import {PassionLevel, Hobby as HobbyInterface} from './Hobby.interface';
 
-export default class Hobby implements HobbyInterface{
-    _id: string;
+// @Note: tried decoupling my core domain entities from the infra level as maximum as possible
+export default class Hobby implements HobbyInterface {
+    _id: mongoose.Types.ObjectId;
     passionLevel: string;
     name: string;
     year: number;
 
     public static create(name: string, passionLevel: string, year: number): Hobby {
-        const id = new mongoose.Types.ObjectId().toHexString();
+        const id = new mongoose.Types.ObjectId();
         return new Hobby(id, passionLevel, name, year);
     }
 
-    private constructor(id: string,
+    public static hydrate(id: mongoose.Types.ObjectId, name: string, passionLevel: string, year: number): Hobby {
+        return new Hobby(id, passionLevel, name, year);
+    }
+
+    private constructor(id: mongoose.Types.ObjectId,
                         passionLevel: string,
                         name: string,
                         year: number,

@@ -1,6 +1,6 @@
 import Server from './src/Server';
 import {UserController} from './src/controllers/UserController';
-import {HobbyController} from "./src/controllers/HobbyController";
+import {HobbyController} from './src/controllers/HobbyController';
 
 process.on('unhandledRejection', reason => {
     throw reason;

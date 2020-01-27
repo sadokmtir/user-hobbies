@@ -4,31 +4,31 @@ networks:
   mercavus:
     driver: bridge
 services:
-  node:
-    container_name: mercavus-node
-    build:
-      context: ./
-      dockerfile: docker/server/Dockerfile
-      target: base
-    ports:
-      - "4000:3030"
-    volumes:
-      - ./:/home/node/app
-    environment:
-      TZ: CET
-      http__port: 3030
-      mongoose__url: mongodb://root:root_password@mongo:27017/mercavus?authSource=admin
-    depends_on:
-      - mongo
-    logging: #read them from /var/lib/docker/containers/*/*-json.log
-      driver: "json-file"
-      options:
-        max-size: "1M"
-        max-file: "100"
-    restart: always
-    networks:
-      - mercavus
-    command: ["./docker/wait-for.sh", "mongo:27017", "--", "npm", "run" ,"watch"]
+#  node:
+#    container_name: mercavus-node
+#    build:
+#      context: ./
+#      dockerfile: docker/server/Dockerfile
+#      target: base
+#    ports:
+#      - "4000:3030"
+#    volumes:
+#      - ./:/home/node/app
+#    environment:
+#      TZ: CET
+#      server__port: 3030
+#      mongoose__url: mongodb://root:root_password@mongo:27017/mercavus?authSource=admin
+#    depends_on:
+#      - mongo
+#    logging: #read them from /var/lib/docker/containers/*/*-json.log
+#      driver: "json-file"
+#      options:
+#        max-size: "1M"
+#        max-file: "100"
+#    restart: always
+#    networks:
+#      - mercavus
+#    command: ["./docker/wait-for.sh", "mongo:27017", "--", "npm", "run" ,"watch"]
 
   mongo:
     image: mongo
