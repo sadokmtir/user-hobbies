@@ -9,6 +9,8 @@ import nconf from './infrastructure/Nconf';
 import logger from './infrastructure/logging/Logger';
 import * as errorMiddleware from './infrastructure/middleware/ErrorMiddleware';
 import UserModel from './domain/user/User.schema';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from '../config/swagger.json';
 
 class Server {
     public app: express.Application;
@@ -37,7 +39,7 @@ class Server {
         const mongoDsn = nconf.get('mongoose:url');
         const connectToMongo = new Promise(((resolve, reject) => {
 
-            mongoose.connect(mongoDsn, {useNewUrlParser: true, useCreateIndex: true });
+            mongoose.connect(mongoDsn, {useNewUrlParser: true, useCreateIndex: true});
             mongoose.connection.on('connected', () => {
                 logger.info('Database started');
                 resolve();
@@ -72,6 +74,7 @@ class Server {
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({extended: false}));
         this.app.use(httpLogger('dev'));
+        this.setApiDocumentation();
         this.app.use(express.static(path.join(__dirname, 'public')));
     }
 
@@ -79,6 +82,11 @@ class Server {
         controllers.forEach((controller) => {
             this.app.use('/', controller.router);
         });
+    }
+
+    //@Note: we could also set it by environment or directly on the docker-compose level, not in our server
+    private setApiDocumentation() {
+        this.app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
     }
 
     private applyExceptionHandlers() {
