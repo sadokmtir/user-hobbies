@@ -9,7 +9,7 @@ import {HobbyRepository} from '../infrastructure/repository/mongo/HobbyRepositor
 import Hobby from '../domain/hobby/Hobby';
 
 export class HobbyController implements Controller {
-    path: string;
+    readonly path: string;
     private hobbyRepository: BaseRepository<HobbyInterface>;
     private userRepository: BaseUserRepository;
     router: express.Router;
@@ -39,7 +39,7 @@ export class HobbyController implements Controller {
             const user = await this.userRepository.findById(userId);
             user.addHobby(hobby);
             this.userRepository.save(user);
-            response.status(200).json(user);
+            response.status(201).json(user);
         } catch (e) {
             next(e);
         }
@@ -51,8 +51,10 @@ export class HobbyController implements Controller {
             const hobbyId = request.params.hobbyId;
             const user = await this.userRepository.findById(userId);
             user.deleteHobby(hobbyId);
-            await this.hobbyRepository.delete(hobbyId);
+            //@Note: i could use as well the pre('remove') middleware to make it as much atomic as possible,
+            // because even that does not guarantee atomicity
             await this.userRepository.save(user);
+            await this.hobbyRepository.delete(hobbyId);
             response.json(user);
         } catch (e) {
             next(e);

@@ -7,6 +7,6 @@
     "level": "info"
   },
   "mongoose": {
-    "url": "mongodb://root:root_password@127.0.0.1:27017/mercavus?authSource=admin"
+    "url": "mongodb://dummy:dumm_password@127.0.0.1:27017/db_dummy"
   }
 }

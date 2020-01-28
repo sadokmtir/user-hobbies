@@ -19,3 +19,7 @@ Thumbs.db
 
 # Ignore built ts files
 dist/**/*
+
+error.log
+
+/data_dir

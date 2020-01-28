@@ -1,7 +1,10 @@
 import {User as UserInterface} from './User.interface';
 import {Hobby} from '../hobby/Hobby.interface';
 import mongoose from 'mongoose';
-import {HobbyDoesNotExistOnUserException} from '../../infrastructure/middleware/exceptions/HobbyExceptions';
+import {
+    HobbyDoesExistOnUserException,
+    HobbyNotFoundException
+} from '../../infrastructure/middleware/exceptions/HobbyExceptions';
 
 // @Note: tried decoupling my core domain entities from the infra level as maximum as possible
 export default class User implements UserInterface {
@@ -31,7 +34,7 @@ export default class User implements UserInterface {
     public addHobby(hobby: Hobby) {
 
         if (this.hobbies.find(userHobby => userHobby.name === hobby.name)) {
-            throw HobbyDoesNotExistOnUserException;
+            throw HobbyDoesExistOnUserException;
         }
         this.hobbies.push(hobby);
     }
@@ -41,9 +44,9 @@ export default class User implements UserInterface {
         const hobbyIndex = this.hobbies.findIndex(hobby => hobby._id.toHexString() === hobbyId);
 
         if (hobbyIndex === -1) {
-            throw HobbyDoesNotExistOnUserException;
+            throw HobbyNotFoundException;
         }
-        this.hobbies.splice(hobbyIndex,  1);
+        this.hobbies.splice(hobbyIndex, 1);
 
     }
 

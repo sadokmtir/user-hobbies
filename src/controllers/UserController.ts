@@ -8,8 +8,8 @@ import UserDto from '../domain/user/user.dto';
 import User from '../domain/user/User';
 
 export class UserController implements Controller {
-    path: string;
-    private userRepository: BaseRepository<UserInterface>;
+    readonly path: string;
+    readonly userRepository: BaseRepository<UserInterface>;
     router: express.Router;
 
     constructor() {
@@ -48,6 +48,7 @@ export class UserController implements Controller {
             .pipe(response.type('json'));
     };
 
+    //@Note: still missing deleting the hobby related which could be done through the pre('remove') middleware as well
     private deleteUser = async (request: express.Request, response: express.Response, next: express.NextFunction) => {
         const userId = request.params.id;
         try {

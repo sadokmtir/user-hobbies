@@ -5,12 +5,15 @@
     "version": "1.0.0",
     "title": "This a sample server"
   },
-  "host": "localhost:5000",
   "basePath": "/",
   "tags": [
     {
       "name": "user",
       "description": "Access to users"
+    },
+    {
+      "name": "hobby",
+      "description": "Manipulate hobbies"
     }
   ],
   "schemes": [
@@ -149,7 +152,7 @@
       "patch": {
         "summary": "Update a user name with given ID",
         "tags": [
-          "Cats"
+          "user"
         ],
         "operationId": "updateUserName",
         "produces": [
@@ -178,6 +181,107 @@
           },
           "404": {
             "description": "User not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/{userId}/hobbies": {
+      "parameters": [
+        {
+          "name": "userId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the user that belongs to the hobby",
+          "type": "string"
+        }
+      ],
+      "post": {
+        "tags": [
+          "hobby"
+        ],
+        "summary": "Assign a hobby to a user",
+        "description": "",
+        "operationId": "addHobbyToUser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Hobby object that needs to be added",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Hobby"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Hobby assigned to user",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid User ID supplied or hobby already exists on User (change the hobby name)",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/{userId}/hobbies/{hobbyId}": {
+      "parameters": [
+        {
+          "name": "userId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the user that belongs to the hobby",
+          "type": "string"
+        },
+        {
+          "name": "hobbyId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the hobby",
+          "type": "string"
+        }
+      ],
+      "delete": {
+        "tags": [
+          "hobby"
+        ],
+        "summary": "Deletes a hobby and revoke it from the corresponding user",
+        "operationId": "deleteUserHobby",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Hobby deleted and revoked"
+          },
+          "400": {
+            "description": "Invalid hobby ID or user ID ",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          },
+          "404": {
+            "description": "User or hobby not found ",
             "schema": {
               "$ref": "#/definitions/ErrorApiResponse"
             }

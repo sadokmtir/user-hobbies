@@ -14,8 +14,7 @@ export class UserRepository implements BaseUserRepository {
     private mongoBaseRepo: MongoBaseRepository<User>;
 
     constructor() {
-        //@todo: I can add dependency injection here, so I can modify in one place the dependency here we have mongo but it could
-        // be mysql, in-memory ...
+        //@todo: I can add dependency injection here, so I can modify in one place the dependency here we have mongo but it couldbe mysql, in-memory ...
         this.mongoBaseRepo = new MongoBaseRepository<UserInterface>(UserModel);
     }
 
