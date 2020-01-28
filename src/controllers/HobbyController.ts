@@ -24,7 +24,7 @@ export class HobbyController implements Controller {
 
     private initializeRoutes() {
         this.router.route(this.path)
-            .post(validationMiddleware(HobbyDto, true), this.createHobbyToUser);
+            .post(validationMiddleware(HobbyDto), this.createHobbyToUser);
 
         this.router.route(`${this.path}/:hobbyId`)
             .delete(this.deleteHobby);

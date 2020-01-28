@@ -6,7 +6,7 @@ import HttpException from '../../middleware/exceptions/HttpException';
 import {Hobby as HobbyInterface} from '../../../domain/hobby/Hobby.interface';
 import Hobby from '../../../domain/hobby/Hobby';
 import hobbyModel from '../../../domain/hobby/hobby.schema';
-import {HobbyNotFoundException} from '../../middleware/exceptions/HobbyExceptions';
+import {HobbyIdNotValidException, HobbyNotFoundException} from '../../middleware/exceptions/HobbyExceptions';
 
 export class HobbyRepository implements BaseRepository<HobbyInterface> {
     private mongoBaseRepo: MongoBaseRepository<HobbyInterface>;
@@ -38,7 +38,7 @@ export class HobbyRepository implements BaseRepository<HobbyInterface> {
 
     private validateUserIdOrThrow(hobbyId: string): void {
         if (!mongoose.Types.ObjectId.isValid(hobbyId)) {
-            throw HobbyNotFoundException;
+            throw HobbyIdNotValidException;
         }
     }
 

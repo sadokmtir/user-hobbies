@@ -7,7 +7,7 @@ import User from '../../../domain/user/User';
 import logger from '../../logging/Logger';
 import HttpException from '../../middleware/exceptions/HttpException';
 import UserStreamTransformer from '../../stream/UserStreamTransformer';
-import {UserNotFoundException} from '../../middleware/exceptions/UserExceptions';
+import {UserIdNotValidException, UserNotFoundException} from '../../middleware/exceptions/UserExceptions';
 import Hobby from '../../../domain/hobby/Hobby';
 
 export class UserRepository implements BaseUserRepository {
@@ -76,7 +76,7 @@ export class UserRepository implements BaseUserRepository {
 
     private validateUserIdOrThrow(userId: string | mongoose.Types.ObjectId): void {
         if (!mongoose.Types.ObjectId.isValid(userId)) {
-            throw UserNotFoundException;
+            throw UserIdNotValidException;
         }
     }
 }

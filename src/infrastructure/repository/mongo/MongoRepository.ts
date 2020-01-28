@@ -13,9 +13,8 @@ export class MongoBaseRepository<T extends { _id: mongoose.Types.ObjectId }> {
     }
 
     async update(item: T): Promise<void> {
-
         const {_id: itemId, ...itemData} = item;
-        await this._model.update({itemId}, itemData);
+        await this._model.findByIdAndUpdate(itemId, itemData);
     }
 
     async delete(itemId: mongoose.Types.ObjectId) {
